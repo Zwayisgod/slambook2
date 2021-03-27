@@ -83,12 +83,17 @@ int main(int argc, char **argv) {
   }
 
   // 构建图优化，先设定g2o
+  // 这一步和原版相同，定义了块求解器类型
   typedef g2o::BlockSolver<g2o::BlockSolverTraits<3, 1>> BlockSolverType;  // 每个误差项优化变量维度为3，误差值维度为1
+  // 这一步也相同，只不过是先typedef了一下
+  // 原版：Block::LinearSolverType* linearSolver = new g2o::LinearSolverDense<Block::PoseMatrixType>(); 
   typedef g2o::LinearSolverDense<BlockSolverType::PoseMatrixType> LinearSolverType; // 线性求解器类型
 
   // 梯度下降方法，可以从GN, LM, DogLeg 中选
+  // 这一步是嵌套操作，先用make_unique定义BlockSolver，再用make_unique创建LinearSolverType对其进行初始化
   auto solver = new g2o::OptimizationAlgorithmGaussNewton(
     g2o::make_unique<BlockSolverType>(g2o::make_unique<LinearSolverType>()));
+  // 其余的操作与原版一致
   g2o::SparseOptimizer optimizer;     // 图模型
   optimizer.setAlgorithm(solver);   // 设置求解器
   optimizer.setVerbose(true);       // 打开调试输出
